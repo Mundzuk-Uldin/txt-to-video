@@ -1,0 +1,7 @@
+gTTS==2.3.2
+icrawler==0.6.7
+moviepy==1.0.3
+nltk==3.8.1
+numpy==1.25.2
+Pillow==10.0.0
+pydub==0.25.1
