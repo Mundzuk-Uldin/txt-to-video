@@ -1,0 +1,11 @@
+Images/*
+Audios/*
+devInput
+Input/*
+!Input/Generic.txt
+Background_Music/*
+venv
+__pycache__
+.idea
+*.mp4
+background.*
