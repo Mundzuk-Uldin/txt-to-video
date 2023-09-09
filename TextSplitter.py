@@ -1,7 +1,7 @@
 import re
 from collections import Counter
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.tag import pos_tag
 
 
@@ -9,17 +9,19 @@ class TextReader:
     def __init__(self, path):
         self.path = path
 
-    def read_and_separate_sentences(self):
+    def read_and_separate_sentences(self, use_nltk=False):
         with open(self.path, 'r', encoding='utf-8') as file:
             content = file.read()
             # Using regex to split the content by the specified punctuation marks
-            sentences = re.split(r'(?<=[.,!?;:])\s+', content)
+            if use_nltk:
+                sentences = sent_tokenize(content)
+            else:
+                sentences = re.split(r"[.,!?;:'\"\-–—\[\]\\`~\n]", content)
             # Filter sentences that don't contain at least one word character
             sentences = [sentence for sentence in sentences if re.search(r'\w', sentence)]
         return sentences
 
-    def most_relevant_word(self):
-        sentences = self.read_and_separate_sentences()
+    def most_relevant_word(self, sentences):
         relevant_words = []
         for sentence in sentences:
             # List of stopwords

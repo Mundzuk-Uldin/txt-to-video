@@ -1,6 +1,7 @@
 from icrawler.builtin import GoogleImageCrawler
 from icrawler import ImageDownloader
 import time
+from random import randint
 
 
 class PrefixNameDownloader(ImageDownloader):
@@ -23,7 +24,7 @@ class GoogleDownloader:
             filters = dict(
                 size='large',)
             google_crawler.crawl(item, min_size=(200, 200), filters=filters, max_num=1, file_idx_offset=i,
-                                 overwrite=True)
+                                 overwrite=True, offset=randint(1, 40))
             i += 1
             max(i, len(items_to_find)-1)
         time.sleep(10)

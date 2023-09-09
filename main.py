@@ -31,6 +31,12 @@ program.add_argument('-sk', '--skip-adjusting', default=False, action='store_tru
                      help="Skips adjusting the audio for background music and uses your audio file as it is")
 program.add_argument('-v', '--volume-adjust', help='Adjust volume to a float. Default value is -30',
                      dest='volume_adjust', nargs='?', type=float, default=-30.0)
+program.add_argument('-n', '--no-download', default=False, action='store_true', dest="no_download",
+                     help="Skips the process to download images and create audios.")
+program.add_argument('-ms', '--min-size', help='Minimum size an image can have', dest='min_size',
+                     nargs='?', type=int, default=640)
+program.add_argument('-nltk', '--use-nltk', help='Flag to use nltk to separate the text', dest='use_nltk',
+                     action='store_true', default=False)
 
 parser = program.parse_args()
 
@@ -44,16 +50,18 @@ music_background = parser.music_background
 output_file = parser.output_file
 skip_adjusting = parser.skip_adjusting
 volume_adjust = parser.volume_adjust
+Debug = parser.no_download
+min_size = parser.min_size
+use_nltk = parser.use_nltk
 
 if gimmick:
     gimmick += " "
 
 text_reader = TextReader(text_file)
-sentences_list = text_reader.read_and_separate_sentences()
+sentences_list = text_reader.read_and_separate_sentences(use_nltk)
 
 video_creator = VideoMaker()
-Debug = False
-relevant_word = text_reader.most_relevant_word()
+relevant_word = text_reader.most_relevant_word(sentences_list)
 
 
 def create_dir(*args):
@@ -70,7 +78,7 @@ if not Debug:
 
 images, audios = video_creator.folder_scanning(image_path, audio_path)
 images = video_creator.add_fallbacks(len(sentences_list), images)
-pil_images = video_creator.images_to_pil(images, resize_size)
+pil_images = video_creator.images_to_pil(images, resize_size, min_size)
 audios = video_creator.audios_to_afc(audios)
 
 clips_with_audio = video_creator.make_composite_list(pil_images, audios, sentences_list)

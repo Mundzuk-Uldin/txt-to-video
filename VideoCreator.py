@@ -1,4 +1,5 @@
 import os
+from random import uniform
 import PIL.Image
 import PIL.ImageChops
 import moviepy.editor as mp
@@ -56,9 +57,10 @@ class VideoMaker:
         return fallback_list
 
     @staticmethod
-    def images_to_pil(fallback_list: list, resize_size=800):
+    def images_to_pil(fallback_list: list, resize_size=800, min_size=640):
         """
         Convert images in a list into pil_images
+        :param min_size:
         :param fallback_list:
         :param resize_size:
         :return:
@@ -72,8 +74,12 @@ class VideoMaker:
             width, height = pillow_img.size
             if width > resize_size:
                 pillow_img = pillow_img.resize((resize_size, pillow_img.size[1]))
+            elif width < min_size:
+                pillow_img = pillow_img.resize((min_size, pillow_img.size[1]))
             if height > resize_size:
                 pillow_img = pillow_img.resize((pillow_img.size[0], resize_size))
+            elif height < min_size:
+                pillow_img = pillow_img.resize((pillow_img.size[0], min_size))
             img = np.asarray(pillow_img.convert('RGB'))
             pil_images.append(img)
         return pil_images
@@ -99,11 +105,12 @@ class VideoMaker:
         """
         clips_with_audio = []
         for index, pil_image in enumerate(pil_images):
-            img_clip = mp.ImageClip(pil_image).set_duration(afc_list[index].duration)
+            img_mp = mp.ImageClip(pil_image)
+            img_clip = img_mp.set_duration(afc_list[index].duration)
             # Calculate font size based on image width and text length
-            sub_height = (len(sentences_list[index]) // 38) * 28 + 28
-            txt_clip = TextClip(sentences_list[index], fontsize=26, color='white', stroke_width=3,
-                                size=(640, sub_height), method='caption', align='south')
+            txt_clip = TextClip(sentences_list[index], fontsize=26, color='white',
+                                size=(round(img_mp.size[0]*uniform(0.66, 0.97)), None), method='caption',
+                                align='south')
             bg_clip = ColorClip(size=(txt_clip.size[0] + 10, txt_clip.size[1] + 10), color=(0, 0, 0, 128))
             # Position the text at the bottom of the screen.
             txt_clip = txt_clip.set_position(('center', 'bottom')).set_duration(img_clip.duration)
